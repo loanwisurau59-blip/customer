@@ -1,0 +1,2092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Gossaigaon Bazar - 15-Minute Grocery Delivery</title>
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --brand-green: #0c831f;
+      --brand-green-dark: #075e14;
+      --brand-green-light: #e8f5e9;
+      --brand-yellow: #f8cb46;
+      --primary: #0c831f;
+      --primary-dark: #075e14;
+      --primary-light: #e8f5e9;
+      --bg: #f4f6fb;
+      --surface: #ffffff;
+      --text-main: #1c1c1c;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #0c831f;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --bottom-nav-height: 64px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #cbd5e1;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app-viewport {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      background: var(--bg);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 50px rgba(0,0,0,0.18);
+    }
+
+    /* Floating Toast Notification System */
+    #toast-container {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 92%;
+      max-width: 430px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      background: rgba(28, 28, 28, 0.96);
+      backdrop-filter: blur(12px);
+      color: #fff;
+      padding: 0.85rem 1.15rem;
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.84rem;
+      font-weight: 700;
+      animation: dropIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .toast.success { border-left: 4px solid var(--brand-green); }
+    .toast.danger { border-left: 4px solid var(--danger); }
+    .toast.info { border-left: 4px solid var(--brand-yellow); }
+
+    @keyframes dropIn {
+      from { transform: translateY(-30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Quick-Commerce Top Header */
+    .app-header {
+      background: #ffffff;
+      padding: 0.85rem 1rem 0.65rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.65rem;
+    }
+
+    .express-delivery-badge {
+      font-size: 0.8rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: #111;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .express-pill {
+      background: var(--brand-yellow);
+      color: #000;
+      font-size: 0.65rem;
+      font-weight: 900;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .delivery-location-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      margin-top: 2px;
+      max-width: 280px;
+    }
+
+    .delivery-location-pill strong {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-profile-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #334155;
+      font-size: 1.1rem;
+      border: 1px solid #e2e8f0;
+    }
+
+    /* Search Bar */
+    .quick-search-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: #f1f4f9;
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      padding: 2px 8px;
+    }
+
+    .quick-search-wrap i.fa-magnifying-glass {
+      padding: 0 10px;
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+
+    .quick-search-input {
+      width: 100%;
+      padding: 0.75rem 0;
+      border: none;
+      background: transparent;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #111;
+      outline: none;
+    }
+
+    .quick-search-input::placeholder { color: #94a3b8; }
+
+    .voice-mic-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      border: none;
+      background: transparent;
+      color: #475569;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .voice-mic-btn.listening {
+      background: var(--danger);
+      color: #fff;
+      animation: pulse 1s infinite;
+    }
+
+    /* Category Circular Scroller */
+    .categories-circular-strip {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding: 0.9rem 1rem 0.6rem;
+      scrollbar-width: none;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      min-width: 68px;
+      cursor: pointer;
+    }
+
+    .cat-icon-circle {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      background: #f8fafc;
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      transition: all 0.2s;
+    }
+
+    .cat-item.active .cat-icon-circle {
+      border-color: var(--brand-green);
+      background: var(--brand-green-light);
+      transform: scale(1.05);
+    }
+
+    .cat-label {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #334155;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .cat-item.active .cat-label { color: var(--brand-green); font-weight: 900; }
+
+    /* Content Area */
+    .tab-content {
+      flex: 1;
+      padding: 0.85rem 0.85rem calc(var(--bottom-nav-height) + 5.5rem);
+      overflow-y: auto;
+      display: none;
+    }
+
+    .tab-content.active { display: block; }
+
+    /* Promo Hero Banner */
+    .promo-hero-card {
+      background: linear-gradient(135deg, #0c831f, #15803d);
+      border-radius: 18px;
+      padding: 1.1rem;
+      color: #fff;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 8px 20px rgba(12, 131, 31, 0.22);
+    }
+
+    .promo-tag-pill {
+      background: var(--brand-yellow);
+      color: #000;
+      font-size: 0.68rem;
+      font-weight: 900;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      display: inline-block;
+      margin-bottom: 4px;
+    }
+
+    /* 2-Column Quick-Commerce Product Grid */
+    .product-grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+    }
+
+    .qc-product-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+    }
+
+    .qc-timer-badge {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 0.62rem;
+      font-weight: 800;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .qc-timer-badge i { color: #f59e0b; }
+
+    .qc-img-wrap {
+      width: 100%;
+      height: 110px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 8px 0;
+    }
+
+    .qc-img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .qc-name {
+      font-size: 0.84rem;
+      font-weight: 800;
+      color: #111;
+      line-height: 1.25;
+      margin-bottom: 3px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 2.1rem;
+    }
+
+    .qc-unit {
+      font-size: 0.7rem;
+      color: #64748b;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .qc-store-tag {
+      font-size: 0.65rem;
+      color: var(--brand-green);
+      font-weight: 800;
+      background: var(--brand-green-light);
+      padding: 1px 5px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .qc-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px dashed #f1f5f9;
+      padding-top: 6px;
+    }
+
+    .qc-price {
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #111;
+    }
+
+    /* Signature Green ADD Button & Counter */
+    .qc-add-btn {
+      background: #ffffff;
+      border: 1.5px solid var(--brand-green);
+      color: var(--brand-green);
+      font-size: 0.78rem;
+      font-weight: 900;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      text-transform: uppercase;
+      box-shadow: 0 2px 4px rgba(12, 131, 31, 0.08);
+      transition: all 0.15s;
+    }
+
+    .qc-add-btn:active {
+      transform: scale(0.95);
+      background: var(--brand-green-light);
+    }
+
+    .qc-counter {
+      display: flex;
+      align-items: center;
+      background: var(--brand-green);
+      border-radius: 8px;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .qc-counter-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      padding: 5px 9px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .qc-counter-val {
+      font-size: 0.82rem;
+      font-weight: 900;
+      min-width: 18px;
+      text-align: center;
+    }
+
+    /* Partner Store Cards */
+    .section-title-row {
+      font-size: 0.92rem;
+      font-weight: 900;
+      color: #0f172a;
+      margin-bottom: 0.65rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .store-mini-card {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      padding: 0.85rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .store-mini-thumb {
+      width: 55px;
+      height: 55px;
+      border-radius: 12px;
+      object-fit: cover;
+    }
+
+    /* FLOATING CART BAR: Z-INDEX 700 (ALWAYS VISIBLE OVER HOME & LOCAL STORE MODAL) */
+    #cart-floating-bar {
+      position: fixed;
+      bottom: calc(var(--bottom-nav-height) + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 1.5rem);
+      max-width: 450px;
+      background: var(--brand-green);
+      color: #ffffff;
+      padding: 0.8rem 1.15rem;
+      border-radius: 16px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 10px 28px rgba(12, 131, 31, 0.45);
+      z-index: 700;
+      cursor: pointer;
+    }
+
+    /* Modals & Sheets */
+    #menu-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(4px);
+      z-index: 600;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    #checkout-modal, #cancel-order-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(5px);
+      z-index: 800; /* Higher than floating cart (700) and menu modal (600) */
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+    }
+
+    .checkout-sheet {
+      background: #ffffff;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 26px 26px 0 0;
+      padding: 1.25rem 1.25rem 2rem;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    /* Multi-Store Section Group in Basket */
+    .store-basket-group {
+      margin-bottom: 0.75rem;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 0.65rem 0.85rem;
+    }
+
+    .store-basket-header {
+      font-size: 0.76rem;
+      font-weight: 900;
+      color: var(--brand-green);
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 4px;
+    }
+
+    .upgraded-cart-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid #edf2f7;
+      gap: 10px;
+    }
+    .upgraded-cart-row:last-child {
+      border-bottom: none;
+    }
+
+    .cart-thumb-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: contain;
+      background: #fff;
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      max-width: 480px;
+      height: var(--bottom-nav-height);
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      display: flex;
+      z-index: 100;
+    }
+
+    .nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      background: none;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-weight: 800;
+    }
+
+    .nav-btn i { font-size: 1.2rem; }
+    .nav-btn.active { color: var(--brand-green); font-weight: 900; }
+
+    /* Form Controls */
+    .form-group { margin-bottom: 0.85rem; }
+    .form-group label { display: block; font-size: 0.74rem; font-weight: 800; color: #64748b; margin-bottom: 4px; text-transform: uppercase; }
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: #f8fafc;
+      font-size: 0.9rem;
+      color: #111;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--brand-green); background: #fff; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 0.85rem 1.25rem;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      border: none;
+      font-size: 0.92rem;
+      width: 100%;
+    }
+    .btn-primary { background: var(--brand-green); color: #fff; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: #111; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .btn-sm { padding: 4px 10px; font-size: 0.75rem; border-radius: 8px; width: auto; }
+
+    /* Orders Card & Tracking */
+    .order-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .otp-security-badge {
+      background: #0f172a;
+      color: #fff;
+      padding: 0.65rem 0.9rem;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 0.65rem 0;
+    }
+
+    .otp-digits {
+      font-family: monospace;
+      font-size: 1.3rem;
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: #38bdf8;
+      background: rgba(255,255,255,0.12);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .delivery-boy-box {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem;
+      margin: 0.65rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Auth Screen */
+    #auth-screen {
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      max-width: 480px;
+      margin: 0 auto;
+      overflow-y: auto;
+    }
+
+    .auth-tabs {
+      display: flex;
+      background: #f1f5f9;
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 1.25rem;
+    }
+    .auth-tab {
+      flex: 1;
+      text-align: center;
+      padding: 0.65rem 0;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: #64748b;
+      cursor: pointer;
+      border-radius: 10px;
+    }
+    .auth-tab.active { background: #fff; color: var(--brand-green); font-weight: 900; }
+  </style>
+
+  <!-- Firebase Compat Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+  <!-- Floating Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- BANNED SCAMMER SCREEN -->
+  <div id="banned-screen" style="display: none;">
+    <i class="fa-solid fa-ban" style="font-size: 3.5rem; color: var(--danger); margin-bottom: 1rem;"></i>
+    <h2 style="font-weight: 900; margin-bottom: 0.5rem;">Account Suspended</h2>
+    <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.5rem;">Your account is suspended due to invalid activities.</p>
+    <button class="btn btn-outline" style="color:#fff;" onclick="customerLogout()">Sign Out</button>
+  </div>
+
+  <!-- MAIN APP VIEWPORT -->
+  <div class="app-viewport">
+
+    <!-- AUTHENTICATION SCREEN -->
+    <div id="auth-screen">
+      <div style="text-align: center; margin-bottom: 1.75rem;">
+        <div style="width: 68px; height: 68px; border-radius: 20px; background: var(--brand-green-light); color: var(--brand-green); font-size: 2.2rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem; border: 2px solid var(--brand-green);">
+          🛒
+        </div>
+        <h1 style="font-size: 1.8rem; font-weight: 900; letter-spacing: -0.5px;">Gossaigaon Bazar</h1>
+        <p style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">Local Grocery SuperApp • 15-Mins Express Delivery</p>
+      </div>
+
+      <div class="auth-tabs">
+        <div class="auth-tab active" id="tab-login-btn" onclick="toggleAuthTab('login')">Sign In</div>
+        <div class="auth-tab" id="tab-signup-btn" onclick="toggleAuthTab('signup')">Create Account</div>
+      </div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="login-email" class="form-input" placeholder="user@gmail.com" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">
+          Continue to Gossaigaon Bazar
+        </button>
+      </form>
+
+      <form id="signup-form" style="display: none;">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="signup-name" class="form-input" placeholder="Rahul Roy" required>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="signup-email" class="form-input" placeholder="name@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>10-Digit Mobile Number</label>
+          <input type="tel" id="signup-phone" class="form-input" placeholder="9876543210" maxlength="10" required>
+        </div>
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label style="margin: 0;">Delivery Address in Gossaigaon</label>
+            <button type="button" class="btn btn-outline btn-sm" onclick="detectSignupGPS()">
+              <i class="fa-solid fa-location-crosshairs"></i> GPS
+            </button>
+          </div>
+          <input type="text" id="signup-address" class="form-input" placeholder="Station Road, Gossaigaon" required>
+        </div>
+        <div class="form-group">
+          <label>Create Password</label>
+          <input type="password" id="signup-password" class="form-input" placeholder="••••••••" minlength="6" required>
+        </div>
+        <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">
+          Create Verified Account
+        </button>
+      </form>
+      <div id="auth-error" style="color:var(--danger); font-size:0.82rem; text-align:center; margin-top:10px;"></div>
+    </div>
+
+    <!-- QUICK-COMMERCE TOP HEADER -->
+    <header class="app-header">
+      <div class="header-top-row">
+        <div>
+          <div class="express-delivery-badge">
+            <span>⚡ 15 MINS EXPRESS</span>
+            <span class="express-pill">LOCAL</span>
+          </div>
+          <div class="delivery-location-pill" onclick="switchNav('profile')">
+            <strong id="header-address-text">Gossaigaon Town</strong>
+            <i class="fa-solid fa-chevron-down" style="font-size: 0.75rem; color: #64748b;"></i>
+          </div>
+        </div>
+        <div class="header-profile-btn" onclick="switchNav('profile')" title="My Profile">
+          <i class="fa-solid fa-user"></i>
+        </div>
+      </div>
+
+      <!-- Quick Search Bar with Voice Mic -->
+      <div class="quick-search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="store-search-input" class="quick-search-input" placeholder="Search vegetables, atta, milk, oil across stores..." oninput="filterStoresAndProducts()">
+        <button class="voice-mic-btn" id="voice-btn" onclick="startVoiceSearch()" title="Voice Search">
+          <i class="fa-solid fa-microphone"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- CIRCULAR CATEGORIES STRIP -->
+    <div class="categories-circular-strip">
+      <div class="cat-item active" onclick="filterCategory('ALL', this)">
+        <div class="cat-icon-circle">🛒</div>
+        <span class="cat-label">All</span>
+      </div>
+      <div class="cat-item" onclick="filterCategory('VEGETABLES', this)">
+        <div class="cat-icon-circle">🥬</div>
+        <span class="cat-label">Vegetables</span>
+      </div>
+      <div class="cat-item" onclick="filterCategory('DAIRY', this)">
+        <div class="cat-icon-circle">🥛</div>
+        <span class="cat-label">Milk & Dairy</span>
+      </div>
+      <div class="cat-item" onclick="filterCategory('STAPLES', this)">
+        <div class="cat-icon-circle">🌾</div>
+        <span class="cat-label">Atta & Rice</span>
+      </div>
+      <div class="cat-item" onclick="filterCategory('SNACKS', this)">
+        <div class="cat-icon-circle">🍪</div>
+        <span class="cat-label">Snacks & Oil</span>
+      </div>
+    </div>
+
+    <!-- TAB 1: QUICK PRODUCTS & STORES FEED -->
+    <div id="tab-home" class="tab-content active">
+      <!-- Promo Hero Banner -->
+      <div class="promo-hero-card">
+        <div>
+          <span class="promo-tag-pill">Gossaigaon Bazar</span>
+          <h3 style="font-weight: 900; font-size: 1.15rem; margin-top: 2px;">Fresh Groceries Delivered</h3>
+          <p style="font-size: 0.78rem; opacity: 0.95;">Shop from any store together! Free Delivery > ₹<span id="hero-free-del-limit">299</span></p>
+        </div>
+        <div style="font-size: 2.4rem;">🛍️</div>
+      </div>
+
+      <!-- 2-Column Quick Products Grid -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.65rem;">
+        <span style="font-size: 0.95rem; font-weight: 900; color: #111;">Trending Daily Essentials</span>
+        <span style="font-size: 0.75rem; color: var(--brand-green); font-weight: 800;">⚡ 15 Mins</span>
+      </div>
+
+      <div class="product-grid-2col" id="instant-products-grid">
+        <p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">Loading groceries...</p>
+      </div>
+
+      <!-- Verified Partner Stores -->
+      <div class="section-title-row">
+        <span>Verified Local Partner Stores</span>
+        <small style="font-size: 0.72rem; color: var(--text-muted);">KYC Verified</small>
+      </div>
+      <div id="stores-container">
+        <p style="text-align: center; color: var(--text-muted); padding: 1rem;">Loading stores...</p>
+      </div>
+    </div>
+
+    <!-- TAB 2: MY ORDERS & LIVE OTP -->
+    <div id="tab-orders" class="tab-content">
+      <div style="font-size: 1.1rem; font-weight: 900; margin-bottom: 0.85rem;">Live Orders & Delivery PIN</div>
+      <div id="orders-container">
+        <p style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading your orders...</p>
+      </div>
+    </div>
+
+    <!-- TAB 3: PROFILE & GPS -->
+    <div id="tab-profile" class="tab-content">
+      <div style="font-size: 1.1rem; font-weight: 900; margin-bottom: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
+        <span>My Account</span>
+        <button type="button" class="btn btn-outline btn-sm" onclick="detectProfileGPS()" style="color:var(--brand-green); border-color:var(--brand-green);">
+          <i class="fa-solid fa-location-crosshairs"></i> Fetch Live GPS
+        </button>
+      </div>
+      <div style="background: #ffffff; border: 1px solid var(--border); border-radius: 18px; padding: 1.15rem; margin-bottom: 1rem;">
+        <form id="profile-form">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="prof-name" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="prof-email" class="form-input" disabled style="background:#f1f5f9; color:#64748b;">
+          </div>
+          <div class="form-group">
+            <label>10-Digit Mobile Number</label>
+            <input type="tel" id="prof-phone" class="form-input" maxlength="10" required>
+          </div>
+          <div class="form-group">
+            <label>Default Delivery Address</label>
+            <textarea id="prof-address" class="form-input" rows="3" required></textarea>
+          </div>
+          <div id="prof-gps-badge" style="display: none; background: #e8f5e9; border: 1px solid #c8e6c9; border-radius: 8px; padding: 6px 10px; font-size: 0.74rem; color: #1b5e20; font-weight: 800; margin-bottom: 0.85rem;">
+            📍 Saved GPS: <span id="prof-gps-text"></span>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Profile Details</button>
+        </form>
+      </div>
+
+      <button class="btn btn-outline" onclick="customerLogout()" style="color: var(--danger); border-color: var(--danger);">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+      </button>
+    </div>
+
+    <!-- FLOATING CART STRIP: Z-INDEX 700 (ALWAYS VISIBLE IN BOTH HOME & LOCAL STORE MODAL) -->
+    <div id="cart-floating-bar" onclick="openCheckoutModal()">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 1.3rem;">🛍️</span>
+        <div>
+          <span id="floating-cart-count" style="display:block; font-size:0.84rem; font-weight:900;">0 ITEMS</span>
+          <span id="floating-cart-total" style="font-size: 1rem; font-weight: 900;">₹0.00</span>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 0.92rem; font-weight: 900;">
+        <span>View Basket</span>
+        <i class="fa-solid fa-chevron-right" style="font-size: 0.8rem;"></i>
+      </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" onclick="switchNav('home')">
+        <i class="fa-solid fa-bag-shopping"></i>
+        <span>Bazar</span>
+      </button>
+      <button class="nav-btn" onclick="switchNav('orders')">
+        <i class="fa-solid fa-receipt"></i>
+        <span>Orders & OTP</span>
+      </button>
+      <button class="nav-btn" onclick="switchNav('profile')">
+        <i class="fa-solid fa-user"></i>
+        <span>Profile</span>
+      </button>
+    </nav>
+
+    <!-- STORE PRODUCTS CATALOG MODAL (Z-INDEX 600, PADDED SO FLOATING CART BAR DOES NOT OVERLAP) -->
+    <div id="menu-modal">
+      <div class="checkout-sheet" style="max-height: 94vh; padding-bottom: 100px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+          <div>
+            <h4 id="menu-store-name" style="font-weight: 900; font-size: 1.1rem; color:#111;">Store Catalog</h4>
+            <span id="menu-store-category" style="font-size: 0.75rem; color: var(--text-muted);">Groceries</span>
+          </div>
+          <i class="fa-solid fa-xmark" onclick="closeMenuModal()" style="font-size: 1.4rem; cursor: pointer; color:#64748b;"></i>
+        </div>
+        <!-- In-Store Dynamic Product Grid -->
+        <div class="product-grid-2col" id="store-products-container"></div>
+      </div>
+    </div>
+
+    <!-- MULTI-STORE UNIFIED BASKET & CHECKOUT MODAL (Z-INDEX 800) -->
+    <div id="checkout-modal">
+      <div class="checkout-sheet">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+          <div>
+            <h3 style="font-weight: 900; font-size: 1.2rem;">My Unified Basket</h3>
+            <span id="checkout-store-name" style="font-size: 0.76rem; color: var(--text-muted); font-weight: 700;">Multi-Store Express Delivery</span>
+          </div>
+          <i class="fa-solid fa-xmark" onclick="closeCheckoutModal()" style="font-size: 1.3rem; cursor: pointer; color:#64748b;"></i>
+        </div>
+
+        <!-- Free Delivery Progress Bar -->
+        <div style="background: var(--brand-green-light); border-radius: 12px; padding: 0.65rem 0.85rem; margin-bottom: 0.85rem;">
+          <div id="free-delivery-text" style="font-size: 0.76rem; font-weight: 800; color: var(--brand-green);">
+            🚚 Add ₹100 more for FREE Delivery!
+          </div>
+          <div style="width:100%; height:6px; background:#c8e6c9; border-radius:10px; margin-top:5px; overflow:hidden;">
+            <div id="free-delivery-bar" style="height:100%; width:50%; background:var(--brand-green);"></div>
+          </div>
+        </div>
+
+        <!-- Multi-Store Items List (Grouped by Store) -->
+        <div id="checkout-items-list" style="max-height: 220px; overflow-y: auto; margin-bottom: 0.85rem;"></div>
+
+        <!-- Promo Coupon Code Input -->
+        <div style="display:flex; gap:8px; margin-bottom: 0.85rem;">
+          <input type="text" id="coupon-input" class="form-input" style="padding:0.5rem 0.75rem; font-size:0.82rem; text-transform:uppercase;" placeholder="Coupon (Try: GOSSAIGAON20)">
+          <button type="button" class="btn btn-outline btn-sm" onclick="applyCoupon()" style="font-weight:900;">Apply</button>
+        </div>
+
+        <!-- Address & Doorstep GPS Pin -->
+        <div style="background: #f8fafc; border-radius: 14px; padding: 0.85rem; margin-bottom: 0.85rem; border: 1px solid var(--border);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <label style="font-size: 0.74rem; font-weight: 900; color: #475569; margin:0;">DELIVERY ADDRESS</label>
+            <button type="button" class="btn btn-outline btn-sm" id="btn-checkout-gps" onclick="fetchCustomerLiveLocation()" style="color:var(--brand-green); border-color:var(--brand-green);">
+              <i class="fa-solid fa-location-crosshairs"></i> Use Current GPS
+            </button>
+          </div>
+          <input type="text" id="checkout-address" class="form-input" style="padding:0.6rem; margin-bottom:6px;" placeholder="House/Flat No, Landmark, Road name..." required>
+          
+          <div id="checkout-gps-status" style="display: none; background: #e8f5e9; border-radius: 6px; padding: 4px 8px; font-size: 0.7rem; color: #1b5e20; font-weight: 800; margin-bottom: 6px;">
+            📍 GPS Pinned: <span id="checkout-coords-display"></span>
+          </div>
+
+          <label style="font-size: 0.72rem; font-weight: 800; color: #64748b; margin-bottom:2px; display:block;">10-DIGIT MOBILE NUMBER</label>
+          <input type="tel" id="checkout-phone" class="form-input" style="padding:0.6rem;" maxlength="10" required>
+        </div>
+
+        <!-- Payment Method Selection -->
+        <div style="margin-bottom: 0.85rem;">
+          <label style="font-size: 0.74rem; font-weight: 900; color: #475569; display:block; margin-bottom:6px;">PAYMENT METHOD</label>
+          <div style="display: flex; gap: 8px;">
+            <div id="pay-card-cod" class="btn btn-outline btn-sm" style="flex:1; border-color:var(--brand-green); background:var(--brand-green-light); color:var(--brand-green); font-weight:900;" onclick="selectPaymentMode('COD')">
+              💵 Cash on Delivery
+            </div>
+            <div id="pay-card-upi" class="btn btn-outline btn-sm" style="flex:1; font-weight:900;" onclick="selectPaymentMode('UPI')">
+              📱 Instant UPI QR
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic UPI QR Container -->
+        <div id="upi-details-container" style="display:none; background:#f8fafc; border:1px dashed var(--brand-green); border-radius:14px; padding:0.85rem; text-align:center; margin-bottom:0.85rem;">
+          <div style="font-size:0.78rem; font-weight:800;">Scan QR Code to Pay</div>
+          <img src="" id="upi-qr-image" style="width:140px; height:140px; margin:6px auto; display:block; background:#fff; padding:4px; border-radius:10px;">
+          <input type="text" id="checkout-utr" class="form-input" placeholder="Enter 12-Digit UPI UTR No." maxlength="12" style="margin-top:6px; font-weight:800; text-align:center;">
+        </div>
+
+        <!-- Bill breakdown -->
+        <div style="border-top: 1px dashed var(--border); padding-top: 0.65rem; margin-bottom: 0.85rem; font-size: 0.84rem;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px; color:#64748b;">
+            <span>Items Subtotal</span>
+            <span id="checkout-subtotal-amount">₹0.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px; color:#111; font-weight:800;">
+            <span>Delivery Fee</span>
+            <span id="checkout-delivery-charge">₹25.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px; color:var(--brand-green); font-weight:800;">
+            <span>Coupon Discount</span>
+            <span id="checkout-discount-amount">-₹0.00</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size: 1.05rem; font-weight: 900; border-top:1px solid var(--border); padding-top:6px; margin-top:4px;">
+            <span>Total Payable</span>
+            <span id="checkout-total-amount" style="color: var(--brand-green);">₹0.00</span>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="placeOrder()" id="btn-place-order" style="padding: 0.95rem; font-size: 1rem; font-weight:900;">
+          Place 15-Minute Order
+        </button>
+      </div>
+    </div>
+
+    <!-- CANCEL ORDER MODAL -->
+    <div id="cancel-order-modal">
+      <div class="checkout-sheet">
+        <h4 style="font-weight: 900; color: var(--danger); margin-bottom: 0.5rem;">Cancel Order?</h4>
+        <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 1rem;">Please select a reason:</p>
+        <input type="hidden" id="cancel-modal-order-id">
+        <div class="form-group">
+          <select id="cancel-reason-select" class="form-input">
+            <option value="Ordered by mistake">Ordered by mistake</option>
+            <option value="Want to change items">Want to change items</option>
+            <option value="Address entered wrongly">Address entered wrongly</option>
+            <option value="Payment problem">Payment problem</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-outline" onclick="closeCancelOrderModal()">Don't Cancel</button>
+          <button class="btn btn-danger" onclick="confirmCustomerCancelOrder()">Cancel Order</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. FIREBASE CONFIGURATION (Verified)
+    // ==========================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyCuJLxRCdhAVZoN81-5weEFnSU4nDr98lo",
+      authDomain: "test-2a0d0.firebaseapp.com",
+      databaseURL: "https://test-2a0d0-default-rtdb.firebaseio.com",
+      projectId: "test-2a0d0",
+      storageBucket: "test-2a0d0.firebasestorage.app",
+      messagingSenderId: "396740286096",
+      appId: "1:396740286096:web:430751766ca9c384946a15",
+      measurementId: "G-W05VPQX3V2"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    // ==========================================
+    // 2. STATE & CONFIG (MULTI-STORE ENABLED)
+    // ==========================================
+    let currentUser = null;
+    let customerProfile = null;
+    let stores = {};
+    let allMenus = {};
+    let deliveryPartners = {};
+    let allSystemOrders = {};
+    let currentStoreId = null;
+    let currentStoreName = '';
+    let currentCategoryFilter = 'ALL';
+    let selectedPaymentMode = 'COD';
+    let adminUpiId = 'gossaigaonbazar@apl';
+    let baseDeliveryCharge = 25;
+    let freeDeliveryMinOrder = 299;
+    let appliedDiscount = 0;
+    let appliedCouponCode = '';
+
+    let detectedCustomerLat = null;
+    let detectedCustomerLng = null;
+    let detectedCustomerLocationLink = "";
+
+    function sanitizeText(str) {
+      return String(str || '').replace(/[<>"'`]/g, '');
+    }
+
+    function isValidIndianMobile(phone) {
+      const cleaned = String(phone || '').replace(/\D/g, '').slice(-10);
+      return /^[6-9]\d{9}$/.test(cleaned);
+    }
+
+    // MULTI-STORE CART STORAGE: Holds items from any store together!
+    let cart = JSON.parse(localStorage.getItem('gb_ultra_cart')) || {
+      items: []
+    };
+
+    function saveCartToLocal() {
+      localStorage.setItem('gb_ultra_cart', JSON.stringify(cart));
+    }
+
+    function showToast(msg, type = 'success') {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.innerHTML = `<span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    // ==========================================
+    // 3. DOORSTEP GPS DETECTION & GEOCODING
+    // ==========================================
+    function fetchCustomerLiveLocation() {
+      const btn = document.getElementById('btn-checkout-gps');
+      const statusBox = document.getElementById('checkout-gps-status');
+      const addressInput = document.getElementById('checkout-address');
+
+      if (!navigator.geolocation) {
+        showToast('GPS available nahi hai.', 'danger');
+        return;
+      }
+
+      btn.innerHTML = `Locating...`;
+      showToast('Finding 15-min delivery doorstep GPS...', 'info');
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          detectedCustomerLat = Number(pos.coords.latitude.toFixed(6));
+          detectedCustomerLng = Number(pos.coords.longitude.toFixed(6));
+          detectedCustomerLocationLink = `https://www.google.com/maps?q=${detectedCustomerLat},${detectedCustomerLng}`;
+
+          btn.innerHTML = `GPS Attached`;
+          statusBox.style.display = 'block';
+          document.getElementById('checkout-coords-display').textContent = `${detectedCustomerLat}, ${detectedCustomerLng}`;
+
+          try {
+            const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${detectedCustomerLat}&lon=${detectedCustomerLng}`);
+            const data = await resp.json();
+            if (data && data.address) {
+              const road = data.address.road || data.address.suburb || data.address.neighbourhood || '';
+              const town = data.address.town || data.address.village || 'Gossaigaon';
+              addressInput.value = `${road ? road + ', ' : ''}${town} [GPS Attached]`;
+            } else {
+              addressInput.value = `Gossaigaon Town [GPS Attached]`;
+            }
+          } catch(e) {
+            addressInput.value = `Gossaigaon Area [GPS Attached]`;
+          }
+          showToast('📍 Doorstep GPS Attached!', 'success');
+        },
+        (err) => {
+          btn.innerHTML = `Retry GPS`;
+          showToast('GPS Error: Turn Location ON', 'danger');
+        },
+        { enableHighAccuracy: true, timeout: 12000 }
+      );
+    }
+
+    function detectProfileGPS() {
+      if (!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(pos => {
+        const lat = Number(pos.coords.latitude.toFixed(6));
+        const lng = Number(pos.coords.longitude.toFixed(6));
+        document.getElementById('prof-gps-badge').style.display = 'block';
+        document.getElementById('prof-gps-text').textContent = `${lat}, ${lng}`;
+        if (currentUser) {
+          db.ref('customers/' + currentUser.uid).update({
+            lat: lat, lng: lng,
+            locationLink: `https://www.google.com/maps?q=${lat},${lng}`
+          });
+        }
+        showToast('Profile GPS Updated!', 'success');
+      });
+    }
+
+    function detectSignupGPS() {
+      if (!navigator.geolocation) return;
+      navigator.geolocation.getCurrentPosition(pos => {
+        const lat = Number(pos.coords.latitude.toFixed(6));
+        const lng = Number(pos.coords.longitude.toFixed(6));
+        document.getElementById('signup-address').value = `Gossaigaon [GPS: ${lat}, ${lng}]`;
+        showToast('GPS Attached!', 'success');
+      });
+    }
+
+    function startVoiceSearch() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        showToast('Voice search is supported on Chrome/Android.', 'info');
+        return;
+      }
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'en-IN';
+      const micBtn = document.getElementById('voice-btn');
+      micBtn.classList.add('listening');
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('store-search-input').value = sanitizeText(transcript);
+        filterStoresAndProducts();
+        micBtn.classList.remove('listening');
+      };
+      recognition.onerror = () => micBtn.classList.remove('listening');
+      recognition.onend = () => micBtn.classList.remove('listening');
+      recognition.start();
+    }
+
+    // ==========================================
+    // 4. AUTHENTICATION
+    // ==========================================
+    const authScreen = document.getElementById('auth-screen');
+    const authError = document.getElementById('auth-error');
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+
+    function toggleAuthTab(type) {
+      authError.textContent = '';
+      if (type === 'login') {
+        document.getElementById('tab-login-btn').classList.add('active');
+        document.getElementById('tab-signup-btn').classList.remove('active');
+        loginForm.style.display = 'block';
+        signupForm.style.display = 'none';
+      } else {
+        document.getElementById('tab-signup-btn').classList.add('active');
+        document.getElementById('tab-login-btn').classList.remove('active');
+        loginForm.style.display = 'none';
+        signupForm.style.display = 'block';
+      }
+    }
+
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      authError.textContent = '';
+      auth.signInWithEmailAndPassword(
+        document.getElementById('login-email').value.trim(),
+        document.getElementById('login-password').value
+      ).catch(err => authError.textContent = err.message);
+    });
+
+    signupForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      authError.textContent = '';
+      const name = sanitizeText(document.getElementById('signup-name').value.trim());
+      const email = document.getElementById('signup-email').value.trim();
+      const phone = document.getElementById('signup-phone').value.trim();
+      const address = sanitizeText(document.getElementById('signup-address').value.trim());
+      const password = document.getElementById('signup-password').value;
+
+      if (!isValidIndianMobile(phone)) {
+        authError.textContent = 'Enter valid 10-digit mobile number!';
+        return;
+      }
+
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(cred => {
+          return db.ref('customers/' + cred.user.uid).set({
+            name, email, phone, address, blocked: false, createdAt: Date.now()
+          });
+        })
+        .catch(err => authError.textContent = err.message);
+    });
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+        authScreen.style.display = 'none';
+        updateCartBar();
+        initApp();
+      } else {
+        currentUser = null;
+        customerProfile = null;
+        authScreen.style.display = 'flex';
+      }
+    });
+
+    function customerLogout() { auth.signOut(); }
+
+    // ==========================================
+    // 5. DATA SYNC & INITIALIZATION
+    // ==========================================
+    function initApp() {
+      db.ref('customers/' + currentUser.uid).on('value', snap => {
+        customerProfile = snap.val() || {};
+        if (customerProfile.blocked === true) {
+          document.getElementById('banned-screen').style.display = 'flex';
+          return;
+        }
+        document.getElementById('header-address-text').textContent = customerProfile.address || 'Gossaigaon Town';
+        document.getElementById('prof-name').value = customerProfile.name || '';
+        document.getElementById('prof-email').value = currentUser.email || '';
+        document.getElementById('prof-phone').value = customerProfile.phone || '';
+        document.getElementById('prof-address').value = customerProfile.address || '';
+        if (customerProfile.lat && customerProfile.lng) {
+          detectedCustomerLat = customerProfile.lat;
+          detectedCustomerLng = customerProfile.lng;
+          detectedCustomerLocationLink = customerProfile.locationLink || '';
+        }
+      });
+
+      db.ref('restaurants').on('value', snap => {
+        stores = snap.val() || {};
+        renderStores();
+      });
+
+      db.ref('menus').on('value', snap => {
+        allMenus = snap.val() || {};
+        renderInstantProducts();
+        if (currentStoreId && document.getElementById('menu-modal').style.display === 'flex') {
+          renderStoreProductsModal();
+        }
+      });
+
+      db.ref('deliveryPartners').on('value', snap => {
+        deliveryPartners = snap.val() || {};
+        renderOrders();
+      });
+
+      db.ref('admin/settings').on('value', snap => {
+        const s = snap.val() || {};
+        if (s.upiId) adminUpiId = s.upiId;
+        if (s.deliveryCharge !== undefined) baseDeliveryCharge = Number(s.deliveryCharge);
+        if (s.freeDeliveryAbove !== undefined) {
+          freeDeliveryMinOrder = Number(s.freeDeliveryAbove);
+          document.getElementById('hero-free-del-limit').textContent = freeDeliveryMinOrder;
+        }
+        updateCartBar();
+      });
+
+      db.ref('orders').on('value', snap => {
+        allSystemOrders = snap.val() || {};
+        const myOrders = {};
+        Object.entries(allSystemOrders).forEach(([id, o]) => {
+          if (o.customerUid === currentUser.uid) myOrders[id] = o;
+        });
+        cachedOrders = myOrders;
+        renderOrders();
+      });
+    }
+
+    document.getElementById('profile-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = sanitizeText(document.getElementById('prof-name').value.trim());
+      const phone = document.getElementById('prof-phone').value.trim();
+      const address = sanitizeText(document.getElementById('prof-address').value.trim());
+
+      if (!isValidIndianMobile(phone)) {
+        showToast('Please enter a valid 10-digit mobile number!', 'danger');
+        return;
+      }
+
+      const updates = { name, phone, address };
+      if (detectedCustomerLat && detectedCustomerLng) {
+        updates.lat = detectedCustomerLat;
+        updates.lng = detectedCustomerLng;
+        updates.locationLink = detectedCustomerLocationLink;
+      }
+
+      db.ref('customers/' + currentUser.uid).update(updates).then(() => {
+        showToast('Profile saved!', 'success');
+      });
+    });
+
+    // ==========================================
+    // 6. MULTI-STORE UNIFIED CART SYSTEM
+    // ==========================================
+    function getItemQuantityInCart(itemId, storeId) {
+      if (!cart || !Array.isArray(cart.items)) return 0;
+      const found = cart.items.find(i => String(i.itemId) === String(itemId) && (!storeId || String(i.storeId) === String(storeId)));
+      return found ? found.qty : 0;
+    }
+
+    // UNIFIED ADD CONTROLLER: Seamlessly supports items from any store!
+    function updateCartQty(itemId, change, name, price, imageUrl, storeId, storeName) {
+      if (!Array.isArray(cart.items)) cart.items = [];
+
+      // Find item matching both item ID and Store ID
+      const idx = cart.items.findIndex(i => String(i.itemId) === String(itemId) && String(i.storeId) === String(storeId));
+
+      if (idx > -1) {
+        cart.items[idx].qty += change;
+        if (cart.items[idx].qty <= 0) {
+          cart.items.splice(idx, 1);
+        }
+      } else if (change > 0) {
+        cart.items.push({
+          itemId: String(itemId),
+          name: name,
+          price: Number(price || 0),
+          qty: 1,
+          imageUrl: imageUrl || '',
+          storeId: String(storeId || ''),
+          storeName: storeName || 'Grocery Store'
+        });
+      }
+
+      saveCartToLocal();
+      updateCartBar();
+
+      // Refresh both Home and Store Catalog views immediately!
+      renderInstantProducts();
+      if (currentStoreId && document.getElementById('menu-modal').style.display === 'flex') {
+        renderStoreProductsModal();
+      }
+      if (document.getElementById('checkout-modal').style.display === 'flex') {
+        renderCheckoutTotals();
+      }
+    }
+
+    function renderItemActionBtn(itemId, name, price, imageUrl, storeId, storeName, qty) {
+      const safeName = escapeHtml(name);
+      const safeStoreName = escapeHtml(storeName);
+      const safeImg = escapeHtml(imageUrl);
+
+      if (qty > 0) {
+        return `
+          <div class="qc-counter">
+            <button class="qc-counter-btn" onclick="updateCartQty('${itemId}', -1, '${safeName}', ${price}, '${safeImg}', '${storeId}', '${safeStoreName}')">-</button>
+            <span class="qc-counter-val">${qty}</span>
+            <button class="qc-counter-btn" onclick="updateCartQty('${itemId}', 1, '${safeName}', ${price}, '${safeImg}', '${storeId}', '${safeStoreName}')">+</button>
+          </div>
+        `;
+      } else {
+        return `
+          <button class="qc-add-btn" onclick="updateCartQty('${itemId}', 1, '${safeName}', ${price}, '${safeImg}', '${storeId}', '${safeStoreName}')">
+            ADD
+          </button>
+        `;
+      }
+    }
+
+    // FLOATING CART PILL (Appears on Home AND inside Local Store Modal)
+    function updateCartBar() {
+      const bar = document.getElementById('cart-floating-bar');
+      if (!cart || !Array.isArray(cart.items)) {
+        bar.style.display = 'none';
+        return;
+      }
+
+      const totalCount = cart.items.reduce((acc, curr) => acc + curr.qty, 0);
+      const subtotal = cart.items.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
+
+      if (totalCount > 0) {
+        document.getElementById('floating-cart-count').textContent = `${totalCount} ITEM${totalCount > 1 ? 'S' : ''}`;
+        document.getElementById('floating-cart-total').textContent = `₹${subtotal.toFixed(0)}`;
+        bar.style.display = 'flex'; // Visible on home and local store
+      } else {
+        bar.style.display = 'none';
+      }
+    }
+
+    // ==========================================
+    // 7. 2-COLUMN INSTANT PRODUCT FEED (HOME)
+    // ==========================================
+    function renderInstantProducts() {
+      const grid = document.getElementById('instant-products-grid');
+      grid.innerHTML = '';
+
+      const query = (document.getElementById('store-search-input')?.value || '').toLowerCase();
+      let itemsList = [];
+
+      Object.entries(allMenus).forEach(([storeId, storeItems]) => {
+        const store = stores[storeId];
+        if (store && store.approved === true) {
+          Object.entries(storeItems).forEach(([itemId, item]) => {
+            if (item.available !== false) {
+              itemsList.push({ ...item, itemId, storeId, storeName: store.name });
+            }
+          });
+        }
+      });
+
+      if (currentCategoryFilter !== 'ALL') {
+        itemsList = itemsList.filter(i => (i.name || '').toUpperCase().includes(currentCategoryFilter) || (i.description || '').toUpperCase().includes(currentCategoryFilter));
+      }
+
+      if (query) {
+        itemsList = itemsList.filter(i => (i.name || '').toLowerCase().includes(query) || (i.description || '').toLowerCase().includes(query) || (i.storeName || '').toLowerCase().includes(query));
+      }
+
+      if (itemsList.length === 0) {
+        grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">No grocery items matching your query.</div>`;
+        return;
+      }
+
+      itemsList.slice(0, 30).forEach(item => {
+        const defaultImg = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop&q=60";
+        const qtyInCart = getItemQuantityInCart(item.itemId, item.storeId);
+
+        grid.innerHTML += `
+          <div class="qc-product-card">
+            <div class="qc-timer-badge"><i class="fa-solid fa-bolt"></i> 15 MINS</div>
+            <div class="qc-img-wrap">
+              <img src="${item.imageUrl || defaultImg}" class="qc-img" onerror="this.src='${defaultImg}'" alt="${escapeHtml(item.name)}">
+            </div>
+            <div>
+              <span class="qc-store-tag">🏪 ${escapeHtml(item.storeName)}</span>
+              <div class="qc-name">${escapeHtml(item.name)}</div>
+              <div class="qc-unit">${escapeHtml(item.description || 'Fresh Stock')}</div>
+            </div>
+            <div class="qc-footer">
+              <span class="qc-price">₹${Number(item.price || 0).toFixed(0)}</span>
+              <div>
+                ${renderItemActionBtn(item.itemId, item.name, Number(item.price || 0), item.imageUrl || defaultImg, item.storeId, item.storeName, qtyInCart)}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // ==========================================
+    // 8. STORE CATALOG MODAL & DYNAMIC RE-RENDER
+    // ==========================================
+    function filterCategory(cat, el) {
+      currentCategoryFilter = cat;
+      document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      renderInstantProducts();
+    }
+
+    function filterStoresAndProducts() {
+      renderInstantProducts();
+      renderStores();
+    }
+
+    function renderStores() {
+      const container = document.getElementById('stores-container');
+      container.innerHTML = '';
+      const query = (document.getElementById('store-search-input')?.value || '').toLowerCase();
+      let approvedStores = Object.entries(stores).filter(([_, s]) => s.approved === true);
+
+      if (query) {
+        approvedStores = approvedStores.filter(([_, s]) => (s.name || '').toLowerCase().includes(query));
+      }
+
+      approvedStores.forEach(([sId, s]) => {
+        const defaultStoreImg = "https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=200&auto=format&fit=crop&q=60";
+        container.innerHTML += `
+          <div class="store-mini-card" onclick="openStoreModal('${sId}', '${escapeHtml(s.name || 'Store')}', '${escapeHtml(s.cuisine || 'Groceries')}')">
+            <img src="${s.imageUrl || defaultStoreImg}" class="store-mini-thumb" onerror="this.src='${defaultStoreImg}'">
+            <div style="flex:1;">
+              <strong style="font-size:0.92rem; color:#111;">${escapeHtml(s.name || 'Store')}</strong>
+              <div style="font-size:0.75rem; color:#64748b;">${escapeHtml(s.cuisine || 'Daily Essentials')}</div>
+              <div style="font-size:0.72rem; color:var(--brand-green); font-weight:800; margin-top:2px;">
+                ⚡ 15 Mins Express • ₹${baseDeliveryCharge} (Free above ₹${freeDeliveryMinOrder})
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right" style="color:#cbd5e1; font-size:0.85rem;"></i>
+          </div>
+        `;
+      });
+    }
+
+    function openStoreModal(storeId, storeName, category) {
+      currentStoreId = storeId;
+      currentStoreName = storeName;
+      document.getElementById('menu-store-name').textContent = storeName;
+      document.getElementById('menu-store-category').textContent = category;
+      document.getElementById('menu-modal').style.display = 'flex';
+      window.history.pushState({ modal: 'menu' }, '');
+
+      renderStoreProductsModal();
+      updateCartBar(); // Ensure cart bar displays inside store modal!
+    }
+
+    function renderStoreProductsModal() {
+      const container = document.getElementById('store-products-container');
+      if (!container || !currentStoreId) return;
+
+      const items = allMenus[currentStoreId] || {};
+      container.innerHTML = '';
+
+      const entries = Object.entries(items).filter(([_, item]) => item.available !== false);
+
+      if (entries.length === 0) {
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted); padding: 2rem;">Is store me abhi koi products available nahi hain.</p>';
+        return;
+      }
+
+      entries.forEach(([itemId, item]) => {
+        const defaultImg = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop&q=60";
+        const qtyInCart = getItemQuantityInCart(itemId, currentStoreId);
+
+        container.innerHTML += `
+          <div class="qc-product-card">
+            <div class="qc-img-wrap">
+              <img src="${item.imageUrl || defaultImg}" class="qc-img" onerror="this.src='${defaultImg}'">
+            </div>
+            <div class="qc-name">${escapeHtml(item.name)}</div>
+            <div class="qc-unit">${escapeHtml(item.description || 'Pack')}</div>
+            <div class="qc-footer">
+              <span class="qc-price">₹${Number(item.price || 0).toFixed(0)}</span>
+              <div>
+                ${renderItemActionBtn(itemId, item.name, Number(item.price || 0), item.imageUrl || defaultImg, currentStoreId, currentStoreName, qtyInCart)}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function closeMenuModal() {
+      document.getElementById('menu-modal').style.display = 'none';
+      currentStoreId = null;
+    }
+
+    // ==========================================
+    // 9. UNIFIED BASKET & MULTI-STORE CHECKOUT
+    // ==========================================
+    function openCheckoutModal() {
+      if (!cart || !Array.isArray(cart.items) || cart.items.length === 0) return;
+
+      document.getElementById('checkout-address').value = customerProfile?.address || '';
+      document.getElementById('checkout-phone').value = customerProfile?.phone || '';
+
+      appliedDiscount = 0;
+      appliedCouponCode = '';
+      document.getElementById('coupon-input').value = '';
+
+      renderCheckoutTotals();
+      selectPaymentMode('COD');
+      document.getElementById('checkout-modal').style.display = 'flex';
+      window.history.pushState({ modal: 'checkout' }, '');
+    }
+
+    // Renders items grouped by their respective Stores
+    function renderCheckoutTotals() {
+      const listContainer = document.getElementById('checkout-items-list');
+      listContainer.innerHTML = '';
+
+      if (!cart || !Array.isArray(cart.items) || cart.items.length === 0) {
+        closeCheckoutModal();
+        return;
+      }
+
+      let subtotal = 0;
+      const defaultImg = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=200&auto=format&fit=crop&q=60";
+
+      // Group items by storeId
+      const groupedByStore = {};
+      cart.items.forEach(item => {
+        const sId = item.storeId || 'general';
+        if (!groupedByStore[sId]) {
+          groupedByStore[sId] = {
+            storeName: item.storeName || 'Grocery Store',
+            items: []
+          };
+        }
+        groupedByStore[sId].items.push(item);
+        subtotal += (item.price * item.qty);
+      });
+
+      const storeCount = Object.keys(groupedByStore).length;
+      document.getElementById('checkout-store-name').textContent = storeCount > 1 
+        ? `${storeCount} Stores in 1 Order` 
+        : `Store: ${Object.values(groupedByStore)[0]?.storeName}`;
+
+      Object.entries(groupedByStore).forEach(([sId, storeGroup]) => {
+        let storeItemsHtml = '';
+        storeGroup.items.forEach(item => {
+          const itemSum = item.price * item.qty;
+          storeItemsHtml += `
+            <div class="upgraded-cart-row">
+              <img src="${item.imageUrl || defaultImg}" class="cart-thumb-img" onerror="this.src='${defaultImg}'">
+              <div style="flex: 1; padding: 0 6px;">
+                <div style="font-size: 0.86rem; font-weight: 800; color: #111; line-height: 1.2;">${escapeHtml(item.name)}</div>
+                <div style="font-size: 0.74rem; color: #64748b; margin-top: 2px;">₹${item.price} each</div>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                <strong style="font-size: 0.95rem; color: #111;">₹${itemSum.toFixed(0)}</strong>
+                <div class="qc-counter" style="border-radius: 6px;">
+                  <button class="qc-counter-btn" style="padding: 3px 8px;" onclick="updateCartQty('${item.itemId}', -1, '${escapeHtml(item.name)}', ${item.price}, '${escapeHtml(item.imageUrl)}', '${sId}', '${escapeHtml(storeGroup.storeName)}')">-</button>
+                  <span class="qc-counter-val" style="font-size: 0.75rem;">${item.qty}</span>
+                  <button class="qc-counter-btn" style="padding: 3px 8px;" onclick="updateCartQty('${item.itemId}', 1, '${escapeHtml(item.name)}', ${item.price}, '${escapeHtml(item.imageUrl)}', '${sId}', '${escapeHtml(storeGroup.storeName)}')">+</button>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+
+        listContainer.innerHTML += `
+          <div class="store-basket-group">
+            <div class="store-basket-header">
+              <i class="fa-solid fa-store"></i> ${escapeHtml(storeGroup.storeName)}
+            </div>
+            ${storeItemsHtml}
+          </div>
+        `;
+      });
+
+      const delCharge = (subtotal >= freeDeliveryMinOrder) ? 0 : baseDeliveryCharge;
+      const netPayable = Math.max(1, subtotal + delCharge - appliedDiscount);
+
+      const progressPercent = Math.min(100, (subtotal / (freeDeliveryMinOrder || 1)) * 100);
+      document.getElementById('free-delivery-bar').style.width = `${progressPercent}%`;
+      document.getElementById('free-delivery-text').innerHTML = delCharge === 0
+        ? `🎉 <strong>FREE Delivery Unlocked!</strong> (Saved ₹${baseDeliveryCharge})`
+        : `🚚 Add <strong>₹${Math.max(1, freeDeliveryMinOrder - subtotal).toFixed(0)}</strong> more for <strong>FREE Delivery!</strong>`;
+
+      document.getElementById('checkout-subtotal-amount').textContent = `₹${subtotal.toFixed(0)}`;
+      document.getElementById('checkout-delivery-charge').textContent = delCharge === 0 ? 'FREE' : `₹${delCharge}`;
+      document.getElementById('checkout-discount-amount').textContent = `-₹${appliedDiscount.toFixed(0)}`;
+      document.getElementById('checkout-total-amount').textContent = `₹${netPayable.toFixed(0)}`;
+
+      if (selectedPaymentMode === 'UPI') updateUpiQrCode(netPayable);
+    }
+
+    function applyCoupon() {
+      const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+      const subtotal = cart.items.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
+
+      if (code === 'GOSSAIGAON20') {
+        if (subtotal < 100) { showToast('Min ₹100 required for GOSSAIGAON20!', 'danger'); return; }
+        appliedDiscount = 20;
+        appliedCouponCode = code;
+        showToast('🎉 ₹20 Coupon Discount Applied!', 'success');
+      } else {
+        showToast('Invalid Coupon Code! Try GOSSAIGAON20', 'danger');
+        return;
+      }
+      renderCheckoutTotals();
+    }
+
+    function selectPaymentMode(mode) {
+      selectedPaymentMode = mode;
+      const codCard = document.getElementById('pay-card-cod');
+      const upiCard = document.getElementById('pay-card-upi');
+      const upiDetails = document.getElementById('upi-details-container');
+
+      const subtotal = cart.items.reduce((acc, curr) => acc + (curr.price * curr.qty), 0);
+      const delCharge = (subtotal >= freeDeliveryMinOrder) ? 0 : baseDeliveryCharge;
+      const netPayable = Math.max(1, subtotal + delCharge - appliedDiscount);
+
+      if (mode === 'COD') {
+        codCard.style.background = 'var(--brand-green-light)';
+        codCard.style.borderColor = 'var(--brand-green)';
+        codCard.style.color = 'var(--brand-green)';
+        upiCard.style.background = 'transparent';
+        upiCard.style.borderColor = 'var(--border)';
+        upiCard.style.color = '#111';
+        upiDetails.style.display = 'none';
+      } else {
+        upiCard.style.background = 'var(--brand-green-light)';
+        upiCard.style.borderColor = 'var(--brand-green)';
+        upiCard.style.color = 'var(--brand-green)';
+        codCard.style.background = 'transparent';
+        codCard.style.borderColor = 'var(--border)';
+        codCard.style.color = '#111';
+        updateUpiQrCode(netPayable);
+        upiDetails.style.display = 'block';
+      }
+    }
+
+    function updateUpiQrCode(amount) {
+      const upiString = `upi://pay?pa=${encodeURIComponent(adminUpiId)}&pn=GossaigaonBazar&am=${amount.toFixed(2)}&cu=INR`;
+      document.getElementById('upi-qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(upiString)}`;
+    }
+
+    function closeCheckoutModal() { document.getElementById('checkout-modal').style.display = 'none'; }
+
+    function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+      if (!lat1 || !lon1 || !lat2 || !lon2) return Infinity;
+      const R = 6371;
+      const dLat = (lat2 - lat1) * (Math.PI / 180);
+      const dLon = (lon2 - lon1) * (Math.PI / 180);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+    }
+
+    function findNearestAvailableRider(storeLat, storeLng) {
+      let nearestRiderUid = null;
+      let minDistance = Infinity;
+
+      const onlineApprovedRiders = Object.entries(deliveryPartners).filter(([_, r]) => 
+        r.approved === true && r.online === true
+      );
+
+      if (onlineApprovedRiders.length === 0) return null;
+
+      onlineApprovedRiders.forEach(([uid, rider]) => {
+        if (rider.lat && rider.lng) {
+          const dist = calculateDistanceKm(storeLat, storeLng, rider.lat, rider.lng);
+          if (dist < minDistance) {
+            minDistance = dist;
+            nearestRiderUid = uid;
+          }
+        } else if (!nearestRiderUid) {
+          nearestRiderUid = uid;
+        }
+      });
+
+      return nearestRiderUid;
+    }
+
+    // MULTI-STORE BATCH ORDER PLACEMENT
+    function placeOrder() {
+      const address = sanitizeText(document.getElementById('checkout-address').value.trim());
+      const phone = document.getElementById('checkout-phone').value.trim();
+      const utr = document.getElementById('checkout-utr')?.value.trim();
+
+      if (address.length < 6) { showToast('Enter proper address!', 'danger'); return; }
+      if (!isValidIndianMobile(phone)) { showToast('Enter valid 10-digit phone!', 'danger'); return; }
+
+      // Group cart items by storeId so each store owner receives their orders cleanly in resturant.html!
+      const storeBatches = {};
+      let totalItemsSubtotal = 0;
+
+      cart.items.forEach(item => {
+        const sId = item.storeId || 'general';
+        if (!storeBatches[sId]) {
+          storeBatches[sId] = {
+            storeName: item.storeName || 'Store',
+            items: [],
+            subtotal: 0
+          };
+        }
+        storeBatches[sId].items.push(item);
+        storeBatches[sId].subtotal += (item.price * item.qty);
+        totalItemsSubtotal += (item.price * item.qty);
+      });
+
+      const storeCount = Object.keys(storeBatches).length;
+      const isFreeDelivery = (totalItemsSubtotal >= freeDeliveryMinOrder);
+      const deliveryOtp = Math.floor(1000 + Math.random() * 9000).toString();
+      const accurateLocationLink = (detectedCustomerLat && detectedCustomerLng) 
+        ? `https://www.google.com/maps?q=${detectedCustomerLat},${detectedCustomerLng}` 
+        : "";
+
+      const orderPromises = [];
+      let isFirstStore = true;
+
+      Object.entries(storeBatches).forEach(([sId, batch]) => {
+        const currentStore = stores[sId] || {};
+        const storeLat = currentStore.lat || 26.4524;
+        const storeLng = currentStore.lng || 89.9723;
+        const assignedRiderUid = findNearestAvailableRider(storeLat, storeLng);
+
+        // Apply delivery charge only to first store batch if not free delivery
+        const batchDeliveryCharge = isFreeDelivery ? 0 : (isFirstStore ? baseDeliveryCharge : 0);
+        isFirstStore = false;
+
+        const batchDiscount = (appliedDiscount > 0 && isFirstStore) ? appliedDiscount : 0;
+        const batchTotal = Math.max(1, batch.subtotal + batchDeliveryCharge - batchDiscount);
+
+        const orderData = {
+          customerUid: currentUser.uid,
+          restaurantId: sId,
+          deliveryUid: assignedRiderUid || null,
+          items: batch.items,
+          subtotalAmount: Number(batch.subtotal.toFixed(2)),
+          deliveryCharge: Number(batchDeliveryCharge.toFixed(2)),
+          discountAmount: Number(batchDiscount.toFixed(2)),
+          couponCode: appliedCouponCode || '',
+          totalAmount: Number(batchTotal.toFixed(2)),
+          address: address,
+          phone: phone,
+          customerLat: detectedCustomerLat || null,
+          customerLng: detectedCustomerLng || null,
+          locationLink: accurateLocationLink,
+          deliveryOtp: deliveryOtp,
+          status: "PLACED",
+          paymentMode: selectedPaymentMode,
+          paymentStatus: selectedPaymentMode === 'UPI' ? 'PENDING_VERIFICATION' : 'COD',
+          transactionId: selectedPaymentMode === 'UPI' ? utr : '',
+          createdAt: Date.now(),
+          updatedAt: Date.now()
+        };
+
+        orderPromises.push(db.ref('orders').push(orderData));
+      });
+
+      Promise.all(orderPromises).then(() => {
+        cart = { items: [] };
+        saveCartToLocal();
+        updateCartBar();
+        closeCheckoutModal();
+        closeMenuModal();
+        switchNav('orders');
+        showToast(`🎉 Order Placed (${storeCount} Stores)! Secret PIN: ${deliveryOtp}`, 'success');
+      }).catch(err => {
+        showToast('Error: ' + err.message, 'danger');
+      });
+    }
+
+    // ==========================================
+    // 10. ORDERS & LIVE RIDER APPROACH
+    // ==========================================
+    let cachedOrders = {};
+
+    function renderOrders() {
+      const container = document.getElementById('orders-container');
+      container.innerHTML = '';
+      const entries = Object.entries(cachedOrders).sort((a,b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
+
+      if (entries.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 2rem;">No orders placed yet.</p>';
+        return;
+      }
+
+      entries.forEach(([orderId, o]) => {
+        const storeName = stores[o.restaurantId]?.name || 'Gossaigaon Kirana';
+        const rider = o.deliveryUid ? deliveryPartners[o.deliveryUid] : null;
+        
+        const rawItems = Array.isArray(o.items) ? o.items : Object.values(o.items || {});
+        const itemsSummary = rawItems.map(i => `${escapeHtml(i.name)} × ${i.qty}`).join(', ');
+
+        container.innerHTML += `
+          <div class="order-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed var(--border); padding-bottom:0.5rem; margin-bottom:0.5rem;">
+              <div>
+                <strong style="font-size:0.95rem; color:#111;">#${orderId.slice(-6)} • ${escapeHtml(storeName)}</strong>
+                <div style="font-size:0.72rem; color:#64748b;">${new Date(o.createdAt).toLocaleTimeString()}</div>
+              </div>
+              <span style="font-size:0.72rem; font-weight:900; background:var(--brand-green-light); color:var(--brand-green); padding:3px 8px; border-radius:10px;">
+                ${o.status}
+              </span>
+            </div>
+
+            <!-- Secret Delivery PIN -->
+            ${o.status !== 'DELIVERED' && o.status !== 'CANCELLED' && o.deliveryOtp ? `
+              <div class="otp-security-badge">
+                <div>
+                  <div style="font-size:0.68rem; text-transform:uppercase; font-weight:800; color:#38bdf8;">🔐 Doorstep Delivery PIN</div>
+                  <div style="font-size:0.72rem;">Share with Rider ONLY after checking items</div>
+                </div>
+                <div class="otp-digits">${o.deliveryOtp}</div>
+              </div>
+            ` : ''}
+
+            <p style="font-size:0.8rem; color:#475569; margin: 4px 0;">${itemsSummary}</p>
+            <div style="display:flex; justify-content:space-between; font-weight:900; font-size:0.95rem; margin:6px 0;">
+              <span>Total Paid:</span>
+              <span style="color:var(--brand-green);">₹${Number(o.totalAmount || 0).toFixed(0)}</span>
+            </div>
+
+            <!-- Rider Live Approach Card -->
+            ${rider && o.status !== 'CANCELLED' ? `
+              <div class="delivery-boy-box">
+                <div>
+                  <strong style="font-size:0.82rem;"><i class="fa-solid fa-motorcycle" style="color:var(--brand-green);"></i> ${escapeHtml(rider.name || 'Delivery Partner')}</strong>
+                  <div style="font-size:0.72rem; color:#64748b;">Vehicle: ${escapeHtml(rider.vehicle || 'Bike')}</div>
+                </div>
+                <div style="display:flex; gap:6px;">
+                  ${rider.phone ? `<a href="tel:${rider.phone}" class="btn btn-outline btn-sm" style="color:var(--brand-green); text-decoration:none;"><i class="fa-solid fa-phone"></i></a>` : ''}
+                  ${rider.lat ? `<a href="https://www.google.com/maps?q=${rider.lat},${rider.lng}" target="_blank" class="btn btn-primary btn-sm" style="text-decoration:none;"><i class="fa-solid fa-location-arrow"></i> Map</a>` : ''}
+                </div>
+              </div>
+            ` : ''}
+
+            ${(o.status === 'PLACED' || o.status === 'ACCEPTED') ? `
+              <button class="btn btn-outline btn-sm" style="color:var(--danger); border-color:#fecaca; margin-top:6px;" onclick="openCancelOrderModal('${orderId}')">
+                Cancel Order
+              </button>
+            ` : ''}
+          </div>
+        `;
+      });
+    }
+
+    function openCancelOrderModal(orderId) {
+      document.getElementById('cancel-modal-order-id').value = orderId;
+      document.getElementById('cancel-order-modal').style.display = 'flex';
+      window.history.pushState({ modal: 'cancel' }, '');
+    }
+
+    function closeCancelOrderModal() { document.getElementById('cancel-order-modal').style.display = 'none'; }
+
+    function confirmCustomerCancelOrder() {
+      const orderId = document.getElementById('cancel-modal-order-id').value;
+      const reason = document.getElementById('cancel-reason-select').value;
+      db.ref('orders/' + orderId).update({
+        status: 'CANCELLED',
+        cancelledBy: 'CUSTOMER',
+        cancelReason: reason,
+        updatedAt: Date.now()
+      }).then(() => {
+        closeCancelOrderModal();
+        showToast('Order Cancelled', 'info');
+      });
+    }
+
+    // ==========================================
+    // 11. NAVIGATION & HARDWARE BACK BUTTON
+    // ==========================================
+    let currentActiveTab = 'home';
+    let lastBackPressTimestamp = 0;
+    window.history.replaceState({ screen: 'home' }, '');
+
+    function switchNav(tabName, pushHistory = true) {
+      if (currentActiveTab === tabName && pushHistory) return;
+
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+      const target = document.getElementById('tab-' + tabName);
+      if (target) target.classList.add('active');
+
+      const buttons = document.querySelectorAll('.nav-btn');
+      if (tabName === 'home') buttons[0]?.classList.add('active');
+      if (tabName === 'orders') buttons[1]?.classList.add('active');
+      if (tabName === 'profile') buttons[2]?.classList.add('active');
+
+      currentActiveTab = tabName;
+      if (pushHistory) window.history.pushState({ screen: tabName }, '');
+    }
+
+    window.addEventListener('popstate', () => {
+      const cancelModal = document.getElementById('cancel-order-modal');
+      const checkoutModal = document.getElementById('checkout-modal');
+      const menuModal = document.getElementById('menu-modal');
+
+      if (cancelModal && cancelModal.style.display === 'flex') { cancelModal.style.display = 'none'; return; }
+      if (checkoutModal && checkoutModal.style.display === 'flex') { checkoutModal.style.display = 'none'; return; }
+      if (menuModal && menuModal.style.display === 'flex') { closeMenuModal(); return; }
+
+      if (currentActiveTab !== 'home') {
+        switchNav('home', false);
+        return;
+      }
+
+      const now = Date.now();
+      if (now - lastBackPressTimestamp < 2000) {
+        window.history.back();
+      } else {
+        lastBackPressTimestamp = now;
+        showToast('Press BACK again to exit Gossaigaon Bazar', 'info');
+        window.history.pushState({ screen: 'home' }, '');
+      }
+    });
+
+    function escapeHtml(text) {
+      return String(text || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+  </script>
+</body>
+</html>
